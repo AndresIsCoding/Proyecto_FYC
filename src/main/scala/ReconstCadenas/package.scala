@@ -22,9 +22,10 @@ package object ReconstCadenas
     // Generar todas las posibles secuencias de longitud n
     val todasLasSecuencias = generarSecuencias(n, Seq())
 
-    // Usar el oráculo para verificar cada secuencia y encontrar la primera que pertenece a S
-    // Si no se encuentra ninguna, devuelve una secuencia vacía
-    todasLasSecuencias.find(o).getOrElse(Seq())
+    // Usamos indexWhere para hallar el índice de la primera secuencia que pertenece a S
+    // Si el índice es -1, ninguna secuencia pertenece a S, por lo que devuelve una secuencia vacía. Si no, devuelve la secuencia en el índice encontrado 
+    if (todasLasSecuencias.indexWhere(o) == -1) Seq()
+    else todasLasSecuencias(todasLasSecuencias.indexWhere(o))
   }
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------------
