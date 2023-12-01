@@ -81,7 +81,7 @@ package object ReconstCadenas
     def generarSubsecuencias(secuencias: Seq[Seq[Char]], potencia: Int): Seq[Seq[Char]] = {
 
       // Si hemos sobrepasado el potencia logN, devolvemos las secuencias que tenemos
-      if (potencia >= logN) secuencias
+      if (potencia > logN) secuencias
       else {
         println("======================================================================================================")
         // Generamos nuevas secuencias concatenando todas las secuencias existentes entre sí
@@ -126,7 +126,7 @@ package object ReconstCadenas
     def generarSubsecuencias(secuencias: Seq[Seq[Char]], potencia: Int): Seq[Seq[Char]] = {
 
       // Si hemos sobrepasado el potencia logN, devolvemos las secuencias que tenemos
-      if (potencia >= logN) secuencias
+      if (potencia > logN) secuencias
       else {
           println("======================================================================================================")
         // Generamos nuevas secuencias concatenando todas las secuencias existentes entre sí
