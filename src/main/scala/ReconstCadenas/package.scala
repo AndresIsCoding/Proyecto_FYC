@@ -2,28 +2,35 @@ import Oraculo.{Oraculo, alfabeto}
 
 package object ReconstCadenas
 {
-  def reconstruirCadenaIngenuo(n: Int, o: Oraculo): Seq[Char] = {
+   def reconstruirCadenaIngenuo(n: Int, o: Oraculo): Seq[Char] = {
 
     // Función auxiliar para generar todas las posibles secuencias de longitud n
-    def generarSecuencias(n: Int, secuenciaActual: Seq[Char]): Seq[Seq[Char]] = {
+    def generarSecuencias(n: Int, secuenciasActuales: Seq[Seq[Char]]): Seq[Seq[Char]] = {
 
-      // Caso base de la recursión: si n es 0, devuelve la secuencia actual
-      if (n == 0) Seq(secuenciaActual)
+      // Caso base de la recursión: si n es 1, devuelve las secuencias actuales
+      if (n == 1) secuenciasActuales
       else {
-        for {
-          // Caso recursivo: para cada letra en el alfabeto, genera todas las secuencias posibles
-          // añadiendo la letra a la secuencia actual y disminuyendo n en 1
+        // Caso recursivo: para cada secuencia actual y cada letra en el alfabeto, genera todas las secuencias posibles
+        // añadiendo la letra a la secuencia actual y disminuyendo n en 1
+        val nuevasSecuencias = for {
+          secuenciaActual <- secuenciasActuales
+
           letra <- alfabeto
-          secuencia <- generarSecuencias(n - 1, secuenciaActual :+ letra)
+          nuevaSecuencia = secuenciaActual :+ letra
+
         }
-        yield secuencia
+        yield nuevaSecuencia
+
+        // Llamamos a la función recursivamente con las nuevas secuencias y disminuyendo n en 1
+        generarSecuencias(n - 1, nuevasSecuencias)
       }
     }
-    // Generar todas las posibles secuencias de longitud n
-    val todasLasSecuencias = generarSecuencias(n, Seq())
 
-    // Usamos indexWhere para hallar el índice de la primera secuencia que pertenece a S
-    // Si el índice es -1, ninguna secuencia pertenece a S, por lo que devuelve una secuencia vacía. Si no, devuelve la secuencia en el índice encontrado 
+    // Generar todas las posibles secuencias de longitud n
+    val todasLasSecuencias = generarSecuencias(n, alfabeto.map(Seq(_)))
+
+    // Usar el oráculo para verificar cada secuencia y encontrar la primera que pertenece a S
+    // Si no se encuentra ninguna, devuelve una secuencia vacía
     if (todasLasSecuencias.indexWhere(o) == -1) Seq()
     else todasLasSecuencias(todasLasSecuencias.indexWhere(o))
   }
