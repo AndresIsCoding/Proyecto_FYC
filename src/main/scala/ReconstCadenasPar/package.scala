@@ -1,7 +1,7 @@
 package object ReconstCadenasPar
 {
   def reconstruirCadenaIngenuoPar(umbral: Int)(n: Int, o: Oraculo): Seq[Char] = {
-    val longitud = n
+    val longitud = n + 1
     // Función auxiliar para generar todas las posibles secuencias de longitud n en paralelo
     def generarSecuenciasParalelo(n: Int, secuenciasActuales: Seq[Seq[Char]]): Seq[Seq[Char]] = {
       // Guarda la longitud original de la secuencia
@@ -14,7 +14,6 @@ package object ReconstCadenasPar
       else {
         // Si n es mayor o igual al umbral, genera las secuencias en paralelo
         if (n <= longitud - umbral) {
-          println("Llamado paralelo")
 
           // Divide el alfabeto en grupos de 4 letras
           val alfabetoPartes = alfabeto.grouped(4).toList
@@ -33,7 +32,6 @@ package object ReconstCadenasPar
           // Llama a la función recursivamente con las nuevas secuencias y disminuyendo n en 1
           generarSecuenciasParalelo(n - 1, nuevasSecuencias)
         } else {
-          println("Llamado secuencial")
 
           // Si n es menor que el umbral, genera las secuencias de forma secuencial
           val nuevasSecuencias = for {
