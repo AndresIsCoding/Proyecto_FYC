@@ -28,7 +28,10 @@ package object MedirTiempos {
   }
 
   //Cualquiera de las 2 funciona , en teoría la segunda es ligeramente más rápida
-
+  
+//Recibe 2 funciones, el tamaño de la secuencia a calcular y el oráculo correspondiente a esa secuencia.
+  //Devuelve, el teimpo de ambas funciones y la aceleración de la segunda respecto a la primera
+  
   //Ejemplo de uso
   /*CompararTiempos(reconstruirCadenaTurboMejorada,reconstruirCadenaTurboMejoradaPar(0),sec3.length,or_3)
   CompararTiemposV2(reconstruirCadenaTurboMejorada,reconstruirCadenaTurboMejoradaPar(0),sec3.length,or_3)*/
