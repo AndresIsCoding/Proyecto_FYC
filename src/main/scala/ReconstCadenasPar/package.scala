@@ -229,4 +229,125 @@ package object ReconstCadenasPar
     // Devuelve la única secuencia candidata de tamaño n que queda luego de terminar la función recursiva
     todasLasSubsecuencias.head
   }
+
+  //--------------------------------------------------------------------------------------------------------------
+
+    def reconstruirCadenaTurboMejoradaPar(umbral: Int)(n: Int, o: Oraculo): Seq[Char] = {
+        // Filtramos el alfabeto para incluir solo las letras que son subcadenas candidatas
+        val alfabeto_filtrado = alfabeto.filter(letra => o(Seq(letra)))
+
+        // Calculamos el logaritmo base 2 de n
+        val logN = (Math.log(n) / Math.log(2)).toInt
+
+        // Definimos una función recursiva para generar todas las subsecuencias de tamaño n
+        def generarSubsecuencias(secuencias: Seq[Seq[Char]], potencia: Int): Seq[Seq[Char]] = {
+
+          // Si hemos sobrepasado el potencia logN, devolvemos las secuencias que tenemos
+          if (potencia > logN) secuencias
+          else {
+            // Si la potencia es mayor o igual al umbral y el tamaño de las secuencias es mayor a 16, entonces paralelizamos la generación de subsecuencias
+            if (potencia >= umbral && secuencias.length > 16) {
+              
+              // Dividimos las secuencias en grupos de tamaño tamañoGrupo
+              val tamañoGrupo = secuencias.length / 4
+              val secuenciasPartes = secuencias.grouped(tamañoGrupo).toList
+
+              // Si la longitud de la lista no es un múltiplo de 4, añade las secuencias restantes al último grupo
+              if (secuencias.length % 4 != 0) {
+                val secuenciasRestantes = secuencias.drop(tamañoGrupo * 4)
+
+                // Procesa cada parte de las secuencias en paralelo
+                val (res1, res2, res3, res4) = parallel(
+                  secuenciasPartes(0).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(nuevaSecuencia => {
+                    // Antes de consultar al oráculo, verificamos que la subsecuencia formada por el segundo
+                    // y tercer cuarto de la nueva secuencia esté contenida en las secuencias
+                    val segundoCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 4, nuevaSecuencia.length / 2)
+                    val tercerCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 2, 3 * nuevaSecuencia.length / 4)
+                    secuencias.contains(segundoCuarto ++ tercerCuarto) && o(nuevaSecuencia)
+                  }),
+                  // Repetimos el mismo proceso para las otras partes de las secuencias
+                  secuenciasPartes(1).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(nuevaSecuencia => {
+                    val segundoCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 4, nuevaSecuencia.length / 2)
+                    val tercerCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 2, 3 * nuevaSecuencia.length / 4)
+                    secuencias.contains(segundoCuarto ++ tercerCuarto) && o(nuevaSecuencia)
+                  }),
+                  secuenciasPartes(2).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(nuevaSecuencia => {
+                    val segundoCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 4, nuevaSecuencia.length / 2)
+                    val tercerCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 2, 3 * nuevaSecuencia.length / 4)
+                    secuencias.contains(segundoCuarto ++ tercerCuarto) && o(nuevaSecuencia)
+                  }),
+                  (secuenciasPartes(3) ++ secuenciasRestantes).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(nuevaSecuencia => {
+                    val segundoCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 4, nuevaSecuencia.length / 2)
+                    val tercerCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 2, 3 * nuevaSecuencia.length / 4)
+                    secuencias.contains(segundoCuarto ++ tercerCuarto) && o(nuevaSecuencia)
+                  })
+                )
+                // Combina los resultados de todos los grupos
+                val nuevasSecuencias = res1 ++ res2 ++ res3 ++ res4
+
+                // Llama a la función recursivamente con las nuevas secuencias y aumenta la potencia
+                generarSubsecuencias(nuevasSecuencias, potencia + 1)
+              } else {
+                // Paralelizamos la generación de nuevas secuencias y la consulta al oráculo
+                val (res1, res2, res3, res4) = parallel(
+                  secuenciasPartes(0).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(nuevaSecuencia => {
+                    // Antes de consultar al oráculo, verificamos que la subsecuencia formada por el segundo
+                    // y tercer cuarto de la nueva secuencia esté contenida en las secuencias
+                    val segundoCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 4, nuevaSecuencia.length / 2)
+                    val tercerCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 2, 3 * nuevaSecuencia.length / 4)
+                    secuencias.contains(segundoCuarto ++ tercerCuarto) && o(nuevaSecuencia)
+                  }),
+                  // Repetimos el mismo proceso para las otras partes de las secuencias
+                  secuenciasPartes(1).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(nuevaSecuencia => {
+                    val segundoCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 4, nuevaSecuencia.length / 2)
+                    val tercerCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 2, 3 * nuevaSecuencia.length / 4)
+                    secuencias.contains(segundoCuarto ++ tercerCuarto) && o(nuevaSecuencia)
+                  }),
+                  secuenciasPartes(2).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(nuevaSecuencia => {
+                    val segundoCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 4, nuevaSecuencia.length / 2)
+                    val tercerCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 2, 3 * nuevaSecuencia.length / 4)
+                    secuencias.contains(segundoCuarto ++ tercerCuarto) && o(nuevaSecuencia)
+                  }),
+                  secuenciasPartes(3).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(nuevaSecuencia => {
+                    val segundoCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 4, nuevaSecuencia.length / 2)
+                    val tercerCuarto = nuevaSecuencia.slice(nuevaSecuencia.length / 2, 3 * nuevaSecuencia.length / 4)
+                    secuencias.contains(segundoCuarto ++ tercerCuarto) && o(nuevaSecuencia)
+                  })
+                )
+
+                // Concatenamos los resultados de las cuatro tareas paralelas
+                val nuevasSecuencias = res1 ++ res2 ++ res3 ++ res4
+
+                // Llamamos a la función recursivamente con las nuevas secuencias y aumentamos la potencia
+                generarSubsecuencias(nuevasSecuencias, potencia + 1)
+              }
+            } else {
+              // Si la potencia es menor que el umbral o el tamaño de las secuencias es menor o igual a 16, entonces generamos las subsecuencias de forma secuencial
+              val nuevasSecuencias = for {
+                secuencia1 <- secuencias
+                secuencia2 <- secuencias
+                nuevaSecuencia = secuencia1 ++ secuencia2
+                // Antes de consultar al oráculo, verificamos que la subsecuencia formada por el segundo y
+                // tercer cuarto de la nueva secuencia esté contenida en las secuencias
+                segundoCuarto = nuevaSecuencia.slice(nuevaSecuencia.length/4, nuevaSecuencia.length/2)
+                tercerCuarto = nuevaSecuencia.slice(nuevaSecuencia.length/2, 3*nuevaSecuencia.length/4)
+                if secuencias.contains(segundoCuarto ++ tercerCuarto)
+                if o(nuevaSecuencia)
+              } yield nuevaSecuencia
+
+              // Llamamos a la función recursivamente con las nuevas secuencias y aumentamos la potencia
+              generarSubsecuencias(nuevasSecuencias, potencia + 1)
+            }
+          }
+        }
+
+        // Creamos las secuencias iniciales con cada letra del alfabeto que hemos filtrado
+        val secuenciasIniciales = alfabeto_filtrado.map(Seq(_))
+
+        // Generamos todas las subsecuencias
+        val todasLasSubsecuencias = generarSubsecuencias(secuenciasIniciales, 1)
+
+        // Devolvemos la primera subsecuencia
+        todasLasSubsecuencias.head
+  }
 }
