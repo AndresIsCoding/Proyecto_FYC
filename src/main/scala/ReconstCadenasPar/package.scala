@@ -149,5 +149,84 @@ package object ReconstCadenasPar
     //Devolvemos la única secuencia candidata de tamaño n que queda luego de terminar la función recursiva
     todasLasSecuencias.head
   }
+//--------------------------------------------------------------------------------------------------------------
 
+    def reconstruirCadenaTurboPar(umbral: Int)(n: Int, o: Oraculo): Seq[Char] = {
+
+    // Filtrar el alfabeto para incluir solo las letras que son subcadenas candidatas
+    val alfabeto_filtrado = alfabeto.filter(letra => o(Seq(letra)))
+
+    // Calculamos el logaritmo base 2 de n
+    val logN = (Math.log(n) / Math.log(2)).toInt
+
+    // Función recursiva para generar todas las subsecuencias de tamaño n
+    def generarSubsecuencias(secuencias: Seq[Seq[Char]], potencia: Int): Seq[Seq[Char]] = {
+
+      // Si hemos sobrepasado el potencia logN, devolvemos las secuencias que tenemos
+      if (potencia > logN) secuencias
+      else {
+        // Si la potencia es mayor o igual al umbral y la longitud de las secuencias es mayor a 16, genera las subsecuencias en paralelo
+        if (potencia >= umbral && secuencias.length > 16) {
+
+          // Divide las secuencias en cuatro partes
+          val tamañoGrupo = secuencias.length / 4
+          val secuenciasPartes = secuencias.grouped(tamañoGrupo).toList
+
+          // Si la longitud de la lista no es un múltiplo de 4, añade las secuencias restantes al último grupo
+          if (secuencias.length % 4 != 0) {
+            val secuenciasRestantes = secuencias.drop(tamañoGrupo * 4)
+
+            // Procesa cada parte de las secuencias en paralelo
+            val (res1, res2, res3, res4) = parallel(
+              secuenciasPartes(0).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(o),
+              secuenciasPartes(1).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(o),
+              secuenciasPartes(2).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(o),
+              (secuenciasPartes(3) ++ secuenciasRestantes).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(o)
+            )
+            // Combina los resultados de todos los grupos
+            val nuevasSecuencias = res1 ++ res2 ++ res3 ++ res4
+
+            // Llama a la función recursivamente con las nuevas secuencias y aumenta la potencia
+            generarSubsecuencias(nuevasSecuencias, potencia + 1)
+          } else {
+          // Si la longitud de la lista  es un múltiplo de 4 cada grupo procesará 1/4 de secuencia
+
+          // Procesa cada parte de las secuencias en paralelo
+          val (res1, res2, res3, res4) = parallel(
+            secuenciasPartes(0).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(o),
+            secuenciasPartes(1).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(o),
+            secuenciasPartes(2).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(o),
+            secuenciasPartes(3).flatMap(secuencia1 => secuencias.map(secuencia2 => (secuencia1 ++ secuencia2))).filter(o)
+          )
+
+          // Combina los resultados de todos los grupos
+          val nuevasSecuencias = res1 ++ res2 ++ res3 ++ res4
+         //println(s"Secuencias Candidatas: ${nuevasSecuencias}")
+
+          // Llama a la función recursivamente con las nuevas secuencias y aumenta la potencia
+          generarSubsecuencias(nuevasSecuencias, potencia + 1)}
+        } else {
+          // Si la potencia es menor que el umbral o la longitud de las secuencias es menor que 16, genera las subsecuencias de forma secuencial
+          val nuevasSecuencias = for {
+            secuencia1 <- secuencias
+            secuencia2 <- secuencias
+            nuevaSecuencia = secuencia1 ++ secuencia2
+            if o(nuevaSecuencia)
+          } yield nuevaSecuencia
+
+          // Llama a la función recursivamente con las nuevas secuencias y aumenta la potencia
+          generarSubsecuencias(nuevasSecuencias, potencia + 1)
+        }
+      }
+    }
+
+    // Crea las secuencias iniciales con cada letra del alfabeto filtrado
+    val secuenciasIniciales = alfabeto_filtrado.map(Seq(_))
+
+    // Genera todas las subsecuencias de tamaño n
+    val todasLasSubsecuencias = generarSubsecuencias(secuenciasIniciales, 1)
+
+    // Devuelve la única secuencia candidata de tamaño n que queda luego de terminar la función recursiva
+    todasLasSubsecuencias.head
+  }
 }
