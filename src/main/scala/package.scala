@@ -1,5 +1,3 @@
-import ReconstCadenas._
-import ReconstCadenasPar._
 import Oraculo._
 import org.scalameter._
 
@@ -28,30 +26,10 @@ package object MedirTiempos {
     val speedup = seqTime.value / parTime.value
     (seqTime.value, parTime.value, speedup)
   }
- /* type Algoritmo = () => Unit
 
-  def medirTiempoEjecucion(algoritmo: Algoritmo): Double = {
-    config(
-      KeyValue(Key.exec.minWarmupRuns -> 20),
-      KeyValue(Key.exec.maxWarmupRuns -> 60),
-      KeyValue(Key.exec.benchRuns -> 120),
-      KeyValue(Key.verbose -> true)
-    ) withWarmer {
-      new Warmer.Default
-    } measure {
-      algoritmo()
-    }
-  }
+  //Cualquiera de las 2 funciona , en teoría la segunda es ligeramente más rápida
 
-  def compararTiempoEjecucion(algoritmo1: Algoritmo, algoritmo2: Algoritmo): (Double, Double, Double) = {
-    val tiempoEjecucion1 = medirTiempoEjecucion(algoritmo1)
-    val tiempoEjecucion2 = medirTiempoEjecucion(algoritmo2)
-
-    println(s"Tiempo de ejecución del primer algoritmo: $tiempoEjecucion1")
-    println(s"Tiempo de ejecución del segundo algoritmo: $tiempoEjecucion2")
-
-    val speedUp = tiempoEjecucion1 / tiempoEjecucion2
-    (tiempoEjecucion1, tiempoEjecucion2, speedUp)
-  }*/
-
+  //Ejemplo de uso
+  /*CompararTiempos(reconstruirCadenaTurboMejorada,reconstruirCadenaTurboMejoradaPar(0),sec3.length,or_3)
+  CompararTiemposV2(reconstruirCadenaTurboMejorada,reconstruirCadenaTurboMejoradaPar(0),sec3.length,or_3)*/
 }
